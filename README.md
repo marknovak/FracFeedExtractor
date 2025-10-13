@@ -26,3 +26,4 @@ The project will train large language models for two tasks: 1) classifying scien
 - Raymond Cen – Contributor  
 - Bradley Rule – Contributor
 
+License: Pending partner confirmation
