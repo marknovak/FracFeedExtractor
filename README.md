@@ -20,8 +20,9 @@ The project will train large language models for two tasks: 1) classifying scien
 [FracFeed: Global database of the fraction of feeding predators](https://github.com/marknovak/FracFeed_DB)
 
 ## Team Members
-Mark Novak - Project Owner/Lead
-Sean Clayton - Contributor
-Zahra Zahir Ahmed Alsulaimawi - Contributor
-Raymond Cen - Contributor
-Bradley Rule - Contributor
+- Mark Novak – Project Owner/Lead  
+- Sean Clayton – Contributor  
+- Zahra Zahir Ahmed Alsulaimawi – Contributor  
+- Raymond Cen – Contributor  
+- Bradley Rule – Contributor
+
