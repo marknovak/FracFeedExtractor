@@ -24,7 +24,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr
           python -m pip install --upgrade pip
-          pip install pymupdf pytesseract pillow
+          pip install pymupdf pytesseract pillow pytest coverage
 
       - name: Run PDF extraction script
         run: |
@@ -32,11 +32,11 @@ jobs:
           INPUT_PDF="tests/test.pdf"
           python src/preprocessing/pdf-text-extraction.py "$INPUT_PDF"
 
-      - name: Run tests on extracted text
+      - name: Run generic output tests
         run: |
           INPUT_PDF="tests/test.pdf"
           OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
-          total_tests=4
+          total_tests=5
           failures=0
 
           # Test 1: Output file exists
@@ -64,11 +64,40 @@ jobs:
             failures=$((failures+1))
           fi
 
-          echo "Tests summary: $total_tests total, $failures failures"
+          # Test 4: At least 1 word
+          word_count=$(wc -w < "$OUTPUT_FILE")
+          if [ "$word_count" -ge 1 ]; then
+            echo "Test 4 passed: at least 1 word extracted"
+          else
+            echo "Test 4 failed: no words extracted"
+            failures=$((failures+1))
+          fi
+
+          # Test 5: File size reasonable (>=10 bytes)
+          file_size=$(stat -c%s "$OUTPUT_FILE")
+          if [ "$file_size" -ge 10 ]; then
+            echo "Test 5 passed: file size is $file_size bytes"
+          else
+            echo "Test 5 failed: file too small ($file_size bytes)"
+            failures=$((failures+1))
+          fi
+
+          echo "Generic tests summary: $total_tests total, $failures failures"
           if [ $failures -gt 0 ]; then
             exit 1
           fi
 
+      - name: Run Python unit tests with coverage
+        run: |
+          coverage run -m pytest tests/
+          coverage report -m
+          coverage html
+
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: htmlcov/
 
       - name: Show extracted text
         run: |
