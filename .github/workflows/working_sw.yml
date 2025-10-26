@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir -p data/processed-text
           INPUT_PDF="tests/test.pdf"
-          python src/preprocessing/pdf-text-extraction.py "$INPUT_PDF"
+          python src/preprocessing/pdf_text_extraction.py "$INPUT_PDF"
 
       - name: Run generic output tests
         run: |
