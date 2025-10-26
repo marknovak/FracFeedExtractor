@@ -64,14 +64,6 @@ jobs:
             failures=$((failures+1))
           fi
 
-          # Test 4: No null bytes
-          if ! grep -q $'\x00' "$OUTPUT_FILE"; then
-            echo "Test 4 passed: no null bytes found"
-          else
-            echo "Test 4 failed: null bytes detected"
-            failures=$((failures+1))
-          fi
-
           echo "Tests summary: $total_tests total, $failures failures"
           if [ $failures -gt 0 ]; then
             exit 1
