@@ -1,0 +1,107 @@
+name: PDF Extraction CI
+
+on:
+  push:
+    branches: [ working-software ]
+  pull_request:
+    branches: [ working-software ]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
+          python -m pip install --upgrade pip
+          pip install pymupdf pytesseract pillow pytest coverage
+
+      - name: Run PDF extraction script
+        run: |
+          mkdir -p data/processed-text
+          INPUT_PDF="tests/test.pdf"
+          python src/preprocessing/pdf_text_extraction.py "$INPUT_PDF"
+
+      - name: Run generic output tests
+        run: |
+          INPUT_PDF="tests/test.pdf"
+          OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
+          total_tests=5
+          failures=0
+
+          # Test 1: Output file exists
+          if [ -f "$OUTPUT_FILE" ]; then
+            echo "Test 1 passed: $OUTPUT_FILE exists"
+          else
+            echo "Test 1 failed: $OUTPUT_FILE missing"
+            failures=$((failures+1))
+          fi
+
+          # Test 2: File is not empty
+          if [ -s "$OUTPUT_FILE" ]; then
+            echo "Test 2 passed: file is not empty"
+          else
+            echo "Test 2 failed: file is empty"
+            failures=$((failures+1))
+          fi
+
+          # Test 3: At least 1 line
+          line_count=$(wc -l < "$OUTPUT_FILE")
+          if [ "$line_count" -ge 1 ]; then
+            echo "Test 3 passed: file has $line_count lines"
+          else
+            echo "Test 3 failed: file has no lines"
+            failures=$((failures+1))
+          fi
+
+          # Test 4: At least 1 word
+          word_count=$(wc -w < "$OUTPUT_FILE")
+          if [ "$word_count" -ge 1 ]; then
+            echo "Test 4 passed: at least 1 word extracted"
+          else
+            echo "Test 4 failed: no words extracted"
+            failures=$((failures+1))
+          fi
+
+          # Test 5: File size reasonable (>=10 bytes)
+          file_size=$(stat -c%s "$OUTPUT_FILE")
+          if [ "$file_size" -ge 10 ]; then
+            echo "Test 5 passed: file size is $file_size bytes"
+          else
+            echo "Test 5 failed: file too small ($file_size bytes)"
+            failures=$((failures+1))
+          fi
+
+          echo "Generic tests summary: $total_tests total, $failures failures"
+          if [ $failures -gt 0 ]; then
+            exit 1
+          fi
+
+      - name: Run Python unit tests with coverage
+        run: |
+          coverage run -m pytest tests/
+          coverage report -m
+          coverage html
+
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+      - name: Show extracted text
+        run: |
+          INPUT_PDF="tests/test.pdf"
+          OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
+          echo "Extracted text from $OUTPUT_FILE:"
+          cat "$OUTPUT_FILE" || echo "No output file found"
