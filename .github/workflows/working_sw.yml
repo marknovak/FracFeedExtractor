@@ -33,4 +33,3 @@ jobs:
       - name: Verify output
         run: |
           echo "Extracted text:"
-          cat data/processed-text/existing.txt || echo "No output file found"
