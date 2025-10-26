@@ -28,7 +28,7 @@ jobs:
 
       - name: Run PDF extraction script
         run: |
-          python pdf_to_text.py test.pdf
+          python src/preprocessing/pdf-text-extraction.py test.pdf
 
       - name: Verify output
         run: |
