@@ -1,10 +1,10 @@
-name: Simple PDF Extraction CI
+name: PDF Extraction CI
 
 on:
   push:
-    branches: [working-software ]
+    branches: [ working-software ]
   pull_request:
-    branches: [working-software ]
+    branches: [ working-software ]
 
 jobs:
   run:
@@ -28,8 +28,59 @@ jobs:
 
       - name: Run PDF extraction script
         run: |
-          python src/preprocessing/pdf-text-extraction.py tests/test.pdf
+          mkdir -p data/processed-text
+          INPUT_PDF="tests/test.pdf"
+          python src/preprocessing/pdf-text-extraction.py "$INPUT_PDF"
 
-      - name: Verify output
+      - name: Run tests on extracted text
         run: |
-          echo "Extracted text:"
+          INPUT_PDF="tests/test.pdf"
+          OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
+          total_tests=4
+          failures=0
+
+          # Test 1: Output file exists
+          if [ -f "$OUTPUT_FILE" ]; then
+            echo "Test 1 passed: $OUTPUT_FILE exists"
+          else
+            echo "Test 1 failed: $OUTPUT_FILE missing"
+            failures=$((failures+1))
+          fi
+
+          # Test 2: File is not empty
+          if [ -s "$OUTPUT_FILE" ]; then
+            echo "Test 2 passed: file is not empty"
+          else
+            echo "Test 2 failed: file is empty"
+            failures=$((failures+1))
+          fi
+
+          # Test 3: At least 1 line
+          line_count=$(wc -l < "$OUTPUT_FILE")
+          if [ "$line_count" -ge 1 ]; then
+            echo "Test 3 passed: file has $line_count lines"
+          else
+            echo "Test 3 failed: file has no lines"
+            failures=$((failures+1))
+          fi
+
+          # Test 4: No null bytes
+          if ! grep -q $'\x00' "$OUTPUT_FILE"; then
+            echo "Test 4 passed: no null bytes found"
+          else
+            echo "Test 4 failed: null bytes detected"
+            failures=$((failures+1))
+          fi
+
+          echo "Tests summary: $total_tests total, $failures failures"
+          if [ $failures -gt 0 ]; then
+            exit 1
+          fi
+
+
+      - name: Show extracted text
+        run: |
+          INPUT_PDF="tests/test.pdf"
+          OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
+          echo "Extracted text from $OUTPUT_FILE:"
+          cat "$OUTPUT_FILE" || echo "No output file found"
