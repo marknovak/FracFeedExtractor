@@ -17,6 +17,7 @@ import argparse
 from pathlib import Path
 import sys
 
+
 def extract_text_from_pdf(pdf_path: str) -> str:
     text = []
     try:
@@ -28,13 +29,13 @@ def extract_text_from_pdf(pdf_path: str) -> str:
                 # Clean out null bytes or UTF-16 artifacts
                 if "\x00" in page_text:
                     page_text = page_text.replace("\x00", "")
-                
+
                 # If the page is mostly empty, treat as image and use OCR
                 if not page_text.strip():
                     pix = page.get_pixmap(dpi=300)
                     img = Image.open(io.BytesIO(pix.tobytes("png")))
                     page_text = pytesseract.image_to_string(img)
-                
+
                 text.append(page_text)
     except Exception as e:
         print(f"[ERROR] Failed to extract text from {pdf_path}: {e}", file=sys.stderr)

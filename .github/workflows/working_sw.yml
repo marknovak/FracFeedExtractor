@@ -1,10 +1,6 @@
 name: PDF Extraction CI
 
-on:
-  push:
-    branches: [ working-software ]
-  pull_request:
-    branches: [ working-software ]
+on: [push, pull_request]
 
 jobs:
   run:
@@ -24,15 +20,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr
           python -m pip install --upgrade pip
-          pip install pymupdf pytesseract pillow pytest coverage
+          pip install -r requirements.txt
+          pip install black flake8 coverage pytest
 
+      # Code quality checks
+      - name: Run linter (Flake8)
+        run: |
+          echo "Running flake8 linter..."
+          flake8 src/ tests/
+
+      - name: Check code formatting (Black)
+        run: |
+          echo "Checking code format with Black..."
+          black --check src tests
+
+      # Functional validation
       - name: Run PDF extraction script
         run: |
           mkdir -p data/processed-text
           INPUT_PDF="tests/test.pdf"
           python src/preprocessing/pdf_text_extraction.py "$INPUT_PDF"
 
-      - name: Run generic output tests
+      - name: Validate extraction output
         run: |
           INPUT_PDF="tests/test.pdf"
           OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
@@ -40,60 +49,35 @@ jobs:
           failures=0
 
           # Test 1: Output file exists
-          if [ -f "$OUTPUT_FILE" ]; then
-            echo "Test 1 passed: $OUTPUT_FILE exists"
-          else
-            echo "Test 1 failed: $OUTPUT_FILE missing"
-            failures=$((failures+1))
-          fi
+          [ -f "$OUTPUT_FILE" ] && echo "Test 1 passed: file exists" || { echo "Test 1 failed: missing"; failures=$((failures+1)); }
 
           # Test 2: File is not empty
-          if [ -s "$OUTPUT_FILE" ]; then
-            echo "Test 2 passed: file is not empty"
-          else
-            echo "Test 2 failed: file is empty"
-            failures=$((failures+1))
-          fi
+          [ -s "$OUTPUT_FILE" ] && echo "Test 2 passed: not empty" || { echo "Test 2 failed: empty"; failures=$((failures+1)); }
 
-          # Test 3: At least 1 line
+          # Test 3: At least one line
           line_count=$(wc -l < "$OUTPUT_FILE")
-          if [ "$line_count" -ge 1 ]; then
-            echo "Test 3 passed: file has $line_count lines"
-          else
-            echo "Test 3 failed: file has no lines"
-            failures=$((failures+1))
-          fi
+          [ "$line_count" -ge 1 ] && echo "Test 3 passed: $line_count lines" || { echo "Test 3 failed: no lines"; failures=$((failures+1)); }
 
-          # Test 4: At least 1 word
+          # Test 4: At least one word
           word_count=$(wc -w < "$OUTPUT_FILE")
-          if [ "$word_count" -ge 1 ]; then
-            echo "Test 4 passed: at least 1 word extracted"
-          else
-            echo "Test 4 failed: no words extracted"
-            failures=$((failures+1))
-          fi
+          [ "$word_count" -ge 1 ] && echo "Test 4 passed: $word_count words" || { echo "Test 4 failed: no words"; failures=$((failures+1)); }
 
-          # Test 5: File size reasonable (>=10 bytes)
+          # Test 5: Reasonable file size
           file_size=$(stat -c%s "$OUTPUT_FILE")
-          if [ "$file_size" -ge 10 ]; then
-            echo "Test 5 passed: file size is $file_size bytes"
-          else
-            echo "Test 5 failed: file too small ($file_size bytes)"
-            failures=$((failures+1))
-          fi
+          [ "$file_size" -ge 10 ] && echo "Test 5 passed: size ${file_size} bytes" || { echo "Test 5 failed: too small (${file_size})"; failures=$((failures+1)); }
 
-          echo "Generic tests summary: $total_tests total, $failures failures"
-          if [ $failures -gt 0 ]; then
-            exit 1
-          fi
+          echo "Summary: $total_tests tests, $failures failed"
+          [ $failures -eq 0 ]
 
-      - name: Run Python unit tests with coverage
+      # Unit testing and coverage
+      - name: Run unit tests with coverage
         run: |
+          echo "Running pytest with coverage..."
           coverage run -m pytest tests/
           coverage report -m
           coverage html
 
-      - name: Upload coverage report artifact
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
@@ -103,5 +87,5 @@ jobs:
         run: |
           INPUT_PDF="tests/test.pdf"
           OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
-          echo "Extracted text from $OUTPUT_FILE:"
-          cat "$OUTPUT_FILE" || echo "No output file found"
+          echo " Extracted text from $OUTPUT_FILE:"
+          cat "$OUTPUT_FILE" || echo " No output file found"
