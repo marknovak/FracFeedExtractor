@@ -10,7 +10,7 @@ All contributors must follow the Oregon State University Student Code of Conduct
 * Report any inappropriate or unprofessional behavior to the TA, instructor or project manager.
   
 **Owner**: Bradley Rule 
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## Getting Started
 * ### Prerequisites
@@ -35,7 +35,7 @@ All contributors must follow the Oregon State University Student Code of Conduct
     * Never hardcode secrets
   
 **Owner**: Raymond Cen
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## Branching & Workflow
 We will use the feature-branch workflow with all merges handled through PRs.
@@ -68,7 +68,7 @@ Feature Description:
 ```
 
 **Owner**: Zahra Zahir Ahmed Alsulaimawi
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## Commit Messages
 We will use the [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/) format for clarity and traceability
@@ -86,7 +86,7 @@ fix(ci): update pytest command in workflow [#42]
 docs(readme): add setup section
 ```
 **Owner**: Raymond Cen
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## Code Style, Linting & Formatting
 We use Black for automatic code formatting and Flake8 for linting to maintain consistent style and prevent common Python errors.
@@ -113,7 +113,7 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
   - Configured to ignore line length violations (E501) and other minor style differences.
   - 
 **Owner**: Sean Clayton
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 
 ## Testing
@@ -152,7 +152,7 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
   - PRs should be rebased on the latest `main` branch before merge if there are conflicts.
   - 
 **Owner**: Sean Clayton
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## CI/CD
 Continuous integration ensures all contributions meet quality standards automatically.
@@ -176,7 +176,7 @@ Continuous integration ensures all contributions meet quality standards automati
   - Artifacts (e.g., coverage reports) are uploaded automatically and can be reviewed.
 
 **Owner**: Sean Clayton
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## Security & Secrets
 State how to report vulnerabilities, prohibited patterns (hard-coded secrets),
@@ -189,7 +189,7 @@ dependency update policy, and scanning tools.
 * Security issues or potential breaches should be reported privately to the Project Manager and TA.
 
 **Owner**: Raymond Cen
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## Documentation Expectations
 
@@ -201,7 +201,7 @@ dependency update policy, and scanning tools.
   - Inline comments should be reserved for places where the function of code is difficult to understand or infer.
 
 **Owner**: Zahra Zahir Ahmed Alsulaimawi
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 
 ## Release Process
 ### Versioning Scheme
@@ -219,7 +219,7 @@ git tag -a v1.2.0 -m "Release v1.2.0: <short description>"
 git push origin v1.2.0
 ```
 **Owner**: Bradley Rule 
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 ### Changelog Generation
 * For each release, include:
 
@@ -257,7 +257,7 @@ Example entry:
   4) Notify the team and project partner of the rollback.
 
 **Owner**: Bradley Rule 
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
 ## Support & Contact
 * **Primaty Communciations**: Slack and Teams
 * **Meetings**: Fridays 1 PM PST
@@ -265,4 +265,4 @@ Example entry:
 * **TA Meetings**: Thursdays 1:30PM PST
 
 **Owner**: Zahra Zahir Ahmed Alsulaimawi
-**Next Rewiew**:  11/26/25
+**Next Review**:  11/26/25
