@@ -31,9 +31,6 @@ All contributors must follow the Oregon State University Student Code of Conduct
     * Never hardcode secrets
   
 ## Branching & Workflow
-Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch
-naming, and when to rebase vs. merge.
-
 We will use the feature-branch workflow with all merges handled through PRs.
 * Default branch: ```main```
 * Branch naming template:
@@ -44,8 +41,21 @@ We will use the feature-branch workflow with all merges handled through PRs.
 Explain how to file issues, required templates/labels, estimation, and
 triage/assignment practices.
 ## Commit Messages
-State the convention (e.g., Conventional Commits), include examples, and how to
-reference issues.
+We will use the [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/) format for clarity and traceability
+
+```
+<type>(scope): short summary [issue number if applicable]
+
+[optional body]
+[optional footer]
+```
+**Examples:**
+```
+feat(parser): implement CSV input parsing 
+fix(ci): update pytest command in workflow [#42]
+docs(readme): add setup section
+```
+
 ## Code Style, Linting & Formatting
 Name the formatter/linter, config file locations, and the exact commands to
 check/fix locally.
