@@ -3,11 +3,7 @@ import subprocess
 import fitz
 from pathlib import Path
 import sys
-from src.preprocessing.pdf_text_extraction import (
-    extract_text_from_pdf,
-    save_to_file,
-    main
-)
+from src.preprocessing.pdf_text_extraction import extract_text_from_pdf, save_to_file, main
 
 
 def test_extract_text_exists():
