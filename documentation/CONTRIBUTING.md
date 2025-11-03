@@ -115,7 +115,7 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
   flake8 src/ tests/
   ```
   - Configured to ignore line length violations (E501) and other minor style differences.
-  - 
+
 **Owner**: Sean Clayton
 **Next Review**:  11/26/25
 
@@ -154,7 +154,7 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
 * ### Approval rules
   - CI must pass all mandatory jobs before merging.
   - PRs should be rebased on the latest `main` branch before merge if there are conflicts.
-  - 
+
 **Owner**: Sean Clayton
 **Next Review**:  11/26/25
 
@@ -222,8 +222,7 @@ dependency update policy, and scanning tools.
 git tag -a v1.2.0 -m "Release v1.2.0: <short description>"
 git push origin v1.2.0
 ```
-**Owner**: Bradley Rule 
-**Next Review**:  11/26/25
+
 ### Changelog Generation
 * For each release, include:
 
