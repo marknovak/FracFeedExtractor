@@ -8,6 +8,10 @@ All contributors must follow the Oregon State University Student Code of Conduct
 * Raise the issue privately with the team first.
 * Issues of academic or ethical concern should be reported directly to the instructor.
 * Report any inappropriate or unprofessional behavior to the TA, instructor or project manager.
+  
+**Owner**: Bradley Rule 
+**Next Rewiew**:  11/26/25
+
 ## Getting Started
 * ### Prerequisites
   * Python 3.10 +
@@ -30,6 +34,9 @@ All contributors must follow the Oregon State University Student Code of Conduct
     * Sensitive information such as API keys will be stored in a local .env file which will be excluded by .gitignore.
     * Never hardcode secrets
   
+**Owner**: Raymond Cen
+**Next Rewiew**:  11/26/25
+
 ## Branching & Workflow
 We will use the feature-branch workflow with all merges handled through PRs.
 * Default branch: ```main```
@@ -60,6 +67,9 @@ Feature Description:
 - Brief explanation of expected implementation 
 ```
 
+**Owner**: Zahra Zahir Ahmed Alsulaimawi
+**Next Rewiew**:  11/26/25
+
 ## Commit Messages
 We will use the [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/) format for clarity and traceability
 
@@ -75,6 +85,8 @@ feat(parser): implement CSV input parsing
 fix(ci): update pytest command in workflow [#42]
 docs(readme): add setup section
 ```
+**Owner**: Raymond Cen
+**Next Rewiew**:  11/26/25
 
 ## Code Style, Linting & Formatting
 We use Black for automatic code formatting and Flake8 for linting to maintain consistent style and prevent common Python errors.
@@ -99,6 +111,10 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
   flake8 src/ tests/
   ```
   - Configured to ignore line length violations (E501) and other minor style differences.
+  - 
+**Owner**: Sean Clayton
+**Next Rewiew**:  11/26/25
+
 
 ## Testing
 * ### Test framework
@@ -134,6 +150,9 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
 * ### Approval rules
   - CI must pass all mandatory jobs before merging.
   - PRs should be rebased on the latest `main` branch before merge if there are conflicts.
+  - 
+**Owner**: Sean Clayton
+**Next Rewiew**:  11/26/25
 
 ## CI/CD
 Continuous integration ensures all contributions meet quality standards automatically.
@@ -155,7 +174,10 @@ Continuous integration ensures all contributions meet quality standards automati
   - All jobs must complete successfully.
   - Any failing test, linter, or formatting check blocks the merge.
   - Artifacts (e.g., coverage reports) are uploaded automatically and can be reviewed.
-  
+
+**Owner**: Sean Clayton
+**Next Rewiew**:  11/26/25
+
 ## Security & Secrets
 State how to report vulnerabilities, prohibited patterns (hard-coded secrets),
 dependency update policy, and scanning tools.
@@ -165,13 +187,18 @@ dependency update policy, and scanning tools.
 * Dependencies are managed in requirements.txt.
 * Use pip-audit monthly to check for vulnerabilities.
 * Security issues or potential breaches should be reported privately to the Project Manager and TA.
+
+**Owner**: Raymond Cen
+**Next Rewiew**:  11/26/25
+
 ## Documentation Expectations
 Specify what must be updated (README, docs/, API refs, CHANGELOG) and
 docstring/comment standards.
-## Release Process
-Describe versioning scheme, tagging, changelog generation, packaging/publishing
-steps, and rollback process.
 
+**Owner**: Zahra Zahir Ahmed Alsulaimawi
+**Next Rewiew**:  11/26/25
+
+## Release Process
 ### Versioning Scheme
 - We follow **semantic versioning****: `MAJOR.MINOR.PATCH`
   - **MAJOR**: breaking changes
@@ -186,7 +213,8 @@ steps, and rollback process.
 git tag -a v1.2.0 -m "Release v1.2.0: <short description>"
 git push origin v1.2.0
 ```
-
+**Owner**: Bradley Rule 
+**Next Rewiew**:  11/26/25
 ### Changelog Generation
 * For each release, include:
 
@@ -223,9 +251,13 @@ Example entry:
   3) Update CHANGELOG to reflect the rollback.
   4) Notify the team and project partner of the rollback.
 
-
+**Owner**: Bradley Rule 
+**Next Rewiew**:  11/26/25
 ## Support & Contact
 * **Primaty Communciations**: Slack and Teams
 * **Meetings**: Fridays 1 PM PST
 * **Project Partner**: Mark Novak, Fridays 8:30AM PST (biweekly check-ins) 
 * **TA Meetings**: Thursdays 1:30PM PST
+
+**Owner**: Zahra Zahir Ahmed Alsulaimawi
+**Next Rewiew**:  11/26/25
