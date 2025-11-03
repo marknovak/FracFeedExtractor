@@ -57,17 +57,84 @@ docs(readme): add setup section
 ```
 
 ## Code Style, Linting & Formatting
-Name the formatter/linter, config file locations, and the exact commands to
-check/fix locally.
+We use Black for automatic code formatting and Flake8 for linting to maintain consistent style and prevent common Python errors.
+
+* ### Formatter: Black
+  - Config file: `pyproject.toml`
+  - Install `pip install black`
+  - Local usage:
+  ```bash
+  # Check formatting without changing files
+  black --check src tests
+
+  # Automatically reformat code
+  black src tests
+  ```
+
+* ### Formatter: Black
+  - Config file: `pyproject.toml`
+  - Install `pip install flake8`
+  - Local usage:
+  ```bash
+  flake8 src/ tests/
+  ```
+  - Configured to ignore line length violations (E501) and other minor style differences.
+
 ## Testing
-Define required test types, how to run tests, expected coverage thresholds, and
-when new/updated tests are mandatory.
+* ### Test framework
+  - `pytest`
+
+* ### Running tests locally
+  ```bash
+  # Run all tests
+  pytest tests/
+
+  # Run tests with coverage
+  coverage run -m pytest tests/
+  coverage report -m
+  coverage html
+
+* ### Expectations
+    - New features must include unit or integration tests.
+    - Coverage thresholds: aim for >80% for core modules; all critical paths must be tested.
+    - Tests must pass locally before creating a PR.
+
 ## Pull Requests & Reviews
-Outline PR requirements (template, checklist, size limits), reviewer expectations,
-approval rules, and required status checks.
+* ### PR requirements
+  - Keep PRs focused and small (**<300 lines changed** if possible).
+  - Include related issue references in the PR description.
+  - Clearly describe what the PR changes and why.
+
+* ### Review process
+  - At least one approving review is required for non-trivial changes.
+  - Reviewers check code quality, tests, CI status, and adherence to style guides.
+  - Ensure all linting and formatting checks pass.
+
+* ### Approval rules
+  - CI must pass all mandatory jobs before merging.
+  - PRs should be rebased on the latest `main` branch before merge if there are conflicts.
+
 ## CI/CD
-Link to pipeline definitions, list mandatory jobs, how to view logs/re-run jobs,
-and what must pass before merge/release.
+Continuous integration ensures all contributions meet quality standards automatically.
+
+* ### Pipeline
+  - GitHub Actions workflow: `.github/workflows/pdf_extraction_ci.yml`
+
+* ### Mandatory jobs
+  - Install dependencies
+  - Code style checks: Black & Flake8
+  - Unit tests & coverage
+  - Functional validation: PDF extraction tests
+
+* ### Viewing logs
+  - Navigate to the **Actions** tab in GitHub.
+  - Select the workflow run and expand individual jobs to see logs.
+
+* ### Before merge
+  - All jobs must complete successfully.
+  - Any failing test, linter, or formatting check blocks the merge.
+  - Artifacts (e.g., coverage reports) are uploaded automatically and can be reviewed.
+  
 ## Security & Secrets
 State how to report vulnerabilities, prohibited patterns (hard-coded secrets),
 dependency update policy, and scanning tools.
