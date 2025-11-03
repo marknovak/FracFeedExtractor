@@ -205,5 +205,7 @@ Example entry:
 
 
 ## Support & Contact
-Provide maintainer contact channel, expected response windows, and where to ask
-questions.
+* **Primaty Communciations**: Slack and Teams
+* **Meetings**: Fridays 1 PM PST
+* **Project Partner**: Mark Novak, Fridays 8:30AM PST (biweekly check-ins) 
+* **TA Meetings**: Thursdays 1:30PM PST
