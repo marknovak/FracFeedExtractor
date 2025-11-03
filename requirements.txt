@@ -3,5 +3,5 @@ pillow
 pytesseract
 pytest
 coverage
-flake8
-black
+flake8==6.1.0
+black==25.9.0
