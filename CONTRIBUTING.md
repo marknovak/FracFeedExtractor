@@ -2,7 +2,12 @@
 How to set up, code, test, review, and release so contributions meet our Definition
 of Done.
 ## Code of Conduct
-Reference the project/community behavior expectations and reporting process.
+All contributors must follow the Oregon State University Student Code of Conduct and the team’s charter agreement.
+* Treat all collaborators with respect and proffessionalism.
+* Provide decent participation during meetings and reviews.
+* Raise the issue privately with the team first.
+* Issues of academic or ethical concern should be reported directly to the instructor.
+* Report any inappropriate or unprofessional behavior to the TA, instructor or project manager.
 ## Getting Started
 * ### Prerequisites
   * Python 3.10 +
@@ -28,6 +33,13 @@ Reference the project/community behavior expectations and reporting process.
 ## Branching & Workflow
 Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch
 naming, and when to rebase vs. merge.
+
+We will use the feature-branch workflow with all merges handled through PRs.
+* Default branch: ```main```
+* Branch naming template:
+  * ```feature/short-name```
+  * ```bugfix/short-name```
+* Rebase your working branch with main, and often, before submitting a PR (simpler conflict resolution)
 ## Issues & Planning
 Explain how to file issues, required templates/labels, estimation, and
 triage/assignment practices.
