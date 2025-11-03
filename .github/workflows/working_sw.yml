@@ -24,15 +24,15 @@ jobs:
           pip install black flake8 coverage pytest
 
       # Code quality checks
-      - name: Run linter (Flake8)
-        run: |
-          echo "Running flake8 linter..."
-          flake8 src/ tests/
-
       - name: Check code formatting (Black)
         run: |
           echo "Checking code format with Black..."
           black --check src tests
+
+      - name: Run linter (Flake8)
+        run: |
+          echo "Running flake8 linter..."
+          flake8 src/ tests/
 
       # Functional validation
       - name: Run PDF extraction script

@@ -3,16 +3,10 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 100
+line-length = 200
 target-version = ["py311"]
 skip-string-normalization = true
 
-[tool.flake8]
-max-line-length = 100
-ignore = [
-    "E203",  # whitespace before ':'
-    "W503",  # line break before binary operator
-]
 exclude = [
     ".git",
     "__pycache__",
