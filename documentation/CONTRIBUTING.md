@@ -192,8 +192,13 @@ dependency update policy, and scanning tools.
 **Next Rewiew**:  11/26/25
 
 ## Documentation Expectations
-Specify what must be updated (README, docs/, API refs, CHANGELOG) and
-docstring/comment standards.
+
+- `README.md`: Provides an overview of the project and its goals. It should also detail where to find information and contact individuals.
+- `documentation/`: This directory will store all documentation for the program and its features including standards and usage information. 
+- `Comments`: 
+  - General comments should be kept short and to the point.
+  - Functions should contain a docstring as the first statement within a function providing a brief explanation of the function and a quick explanation of parameters and return values.
+  - Inline comments should be reserved for places where the function of code is difficult to understand or infer.
 
 **Owner**: Zahra Zahir Ahmed Alsulaimawi
 **Next Rewiew**:  11/26/25
