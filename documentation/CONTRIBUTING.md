@@ -38,9 +38,6 @@ We will use the feature-branch workflow with all merges handled through PRs.
   * ```bugfix/short-name```
 * Rebase your working branch with main, and often, before submitting a PR (simpler conflict resolution)
 ## Issues & Planning
-Explain how to file issues, required templates/labels, estimation, and
-triage/assignment practices.
-
 Issue titles should start with the following tags to designate intent:
 - `FEAT:` New feature request.
   - Include problem and feature description within issue description field.
