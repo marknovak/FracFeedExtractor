@@ -40,6 +40,29 @@ We will use the feature-branch workflow with all merges handled through PRs.
 ## Issues & Planning
 Explain how to file issues, required templates/labels, estimation, and
 triage/assignment practices.
+
+Issue titles should start with the following tags to designate intent:
+- `FEAT:` New feature request.
+  - Include problem and feature description within issue description field.
+  - Include note of requirement ID where applicable (ex: `Requirement ID: REQ-005`).
+- `BUG:`  Bug report.
+  - Include problem description.
+- `DOC:`  Documentation changes.
+  - Brief description of what needs to be changed or added.
+
+Example:
+```
+FEAT: Example Issue
+
+Requirement ID: REQ-XXX
+
+Problem Desciption:
+- Brief explanation of why this is important
+
+Feature Description:
+- Brief explanation of expected implementation 
+```
+
 ## Commit Messages
 We will use the [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/) format for clarity and traceability
 
