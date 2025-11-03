@@ -134,6 +134,8 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
   coverage report -m
   coverage html
   ```
+**Owner**: Sean Clayton
+**Next Review**:  11/26/25
 
 * ### Expectations
     - New features must include unit or integration tests.
@@ -155,7 +157,7 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
   - CI must pass all mandatory jobs before merging.
   - PRs should be rebased on the latest `main` branch before merge if there are conflicts.
 
-**Owner**: Sean Clayton
+**Owner**: Bradley Rule
 **Next Review**:  11/26/25
 
 ## CI/CD
