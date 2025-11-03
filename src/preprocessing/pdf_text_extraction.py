@@ -1,4 +1,4 @@
-""" PDF Text Extraction Script
+"""PDF Text Extraction Script
 
 Usage:
     python pdf_to_text.py path/to/input.pdf
