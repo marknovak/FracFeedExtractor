@@ -6,17 +6,18 @@ build-backend = "setuptools.build_meta"
 line-length = 200
 target-version = ["py311"]
 skip-string-normalization = true
-
-exclude = [
-    ".git",
-    "__pycache__",
-    "build",
-    "dist",
-    "venv",
-    ".venv",
-    ".mypy_cache",
-    "htmlcov",
-]
+exclude = '''
+/(
+    \.git
+  | __pycache__
+  | build
+  | dist
+  | venv
+  | \.venv
+  | \.mypy_cache
+  | htmlcov
+)/
+'''
 
 [tool.pytest.ini_options]
 addopts = "-ra --disable-warnings"
