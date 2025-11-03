@@ -44,6 +44,10 @@ We will use the feature-branch workflow with all merges handled through PRs.
   * ```feature/short-name```
   * ```bugfix/short-name```
 * Rebase your working branch with main, and often, before submitting a PR (simpler conflict resolution)
+  
+**Owner**: Zahra Zahir Ahmed Alsulaimawi
+**Next Review**:  11/26/25
+
 ## Issues & Planning
 Issue titles should start with the following tags to designate intent:
 - `FEAT:` New feature request.
