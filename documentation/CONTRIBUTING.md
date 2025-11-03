@@ -93,6 +93,7 @@ We use Black for automatic code formatting and Flake8 for linting to maintain co
   coverage run -m pytest tests/
   coverage report -m
   coverage html
+  ```
 
 * ### Expectations
     - New features must include unit or integration tests.
@@ -138,12 +139,71 @@ Continuous integration ensures all contributions meet quality standards automati
 ## Security & Secrets
 State how to report vulnerabilities, prohibited patterns (hard-coded secrets),
 dependency update policy, and scanning tools.
+
+* Never commit sensitive credentials, tokens, or API keys.
+* Secrets are stored locally in .env files and excluded via .gitignore.
+* Dependencies are managed in requirements.txt.
+* Use pip-audit monthly to check for vulnerabilities.
+* Security issues or potential breaches should be reported privately to the Project Manager and TA.
 ## Documentation Expectations
 Specify what must be updated (README, docs/, API refs, CHANGELOG) and
 docstring/comment standards.
 ## Release Process
 Describe versioning scheme, tagging, changelog generation, packaging/publishing
 steps, and rollback process.
+
+### Versioning Scheme
+- We follow **semantic versioning****: `MAJOR.MINOR.PATCH`
+  - **MAJOR**: breaking changes
+  - **MINOR**: new features, backwards-compatible
+  - **PATCH**: bug fixes, minor improvements
+- Example: `1.2.0` → `1.2.1` (patch), `1.3.0` (minor), `2.0.0` (major)
+
+### Tagging
+- Each release must be tagged in Git using the version number:
+
+```bash
+git tag -a v1.2.0 -m "Release v1.2.0: <short description>"
+git push origin v1.2.0
+```
+
+### Changelog Generation
+* For each release, include:
+
+  * Added: new features
+  * Changed: updates or improvements
+  * Fixed: bug fixes
+
+Example entry:
+```
+## [1.2.0] - 2025-11-10
+### Added
+- New feed extraction method
+### Fixed
+- Timeout handling in API fetch
+```
+
+### Packaging and Publishing
+* Before publishing, ensure all CI/CD pipelines pass.
+* Prepare the release branch or merge main into it.
+* Include updated documentation and changelog.
+
+### Rollback Process
+* In case of a faulty release
+  1) Revert the release tag in Git:
+    ```
+    git tag -d v1.2.0
+    git push origin :refs/tags/v1.2.0
+    ```
+  2) Revert the merge commit on the main branch:
+    ```
+    git revert -m 1 <merge-commit-hash>
+    git push origin main
+    ```
+  3) Update CHANGELOG to reflect the rollback.
+  4) Notify the team and project partner of the rollback.
+
+
 ## Support & Contact
 Provide maintainer contact channel, expected response windows, and where to ask
 questions.
