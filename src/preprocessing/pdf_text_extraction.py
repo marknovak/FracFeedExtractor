@@ -17,6 +17,7 @@ import argparse
 from pathlib import Path
 import sys
 
+Image.MAX_IMAGE_PIXELS = None
 fitz.TOOLS.mupdf_display_errors(False)
 
 
