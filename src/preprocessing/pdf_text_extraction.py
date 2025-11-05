@@ -17,6 +17,8 @@ import argparse
 from pathlib import Path
 import sys
 
+fitz.TOOLS.mupdf_display_errors(False)
+
 
 def extract_text_from_pdf(pdf_path: str) -> str:
     text = []

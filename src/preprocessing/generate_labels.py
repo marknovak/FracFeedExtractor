@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+
 def generate_labels(useful_dir="data/useful", not_useful_dir="data/not-useful", output_file="data/labels.json"):
     labels = {}
 
