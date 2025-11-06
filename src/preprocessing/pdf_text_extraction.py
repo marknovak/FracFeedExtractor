@@ -23,6 +23,7 @@ fitz.TOOLS.mupdf_display_errors(False)
 
 def extract_text_from_pdf(pdf_path: str) -> str:
     text = []
+    print(f"Extracting text from {pdf_path}.")
     try:
         with fitz.open(pdf_path) as doc:
             for page_num, page in enumerate(doc, start=1):
