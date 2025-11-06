@@ -6,9 +6,6 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 from src.preprocessing.pdf_text_extraction import extract_text_from_pdf
 
-DIET_TERMS = ["stomach contents", "prey composition", "percent occurrence", "feeding habits", "gut content", "dietary analysis", "trophic", "predator-prey", "fish species", "diet analysis"]
-
-
 # Classify a single PDF as useful or not useful based on its text content.
 def classify_pdf(pdf_path, model_dir="src/model/model-config"):
     model_path = Path(model_dir) / "pdf_classifier_model.pkl"
@@ -32,19 +29,12 @@ def classify_pdf(pdf_path, model_dir="src/model/model-config"):
     X_vec = vectorizer.transform([text])
     prediction = model.predict(X_vec)[0]
 
-    if hasattr(model, "predict_proba"):
-        prob = model.predict_proba(X_vec)[0]
-        confidence = max(prob)
-        print("\n=== PDF Classification Result ===")
-        print(f" File:        {Path(pdf_path).name}")
-        print(f" Prediction:  {prediction.capitalize()} ({confidence:.2%} confidence)")
-        print("=================================\n")
-    else:
-        print("\n=== PDF Classification Result ===")
-        print(f" File:        {Path(pdf_path).name}")
-        print(f" Prediction:  {prediction.capitalize()}")
-        print("=================================\n")
-
+    prob = model.predict_proba(X_vec)[0]
+    confidence = max(prob)
+    print("\n=== PDF Classification Result ===")
+    print(f" File:        {Path(pdf_path).name}")
+    print(f" Prediction:  {prediction.capitalize()} ({confidence:.2%} confidence)")
+    print("=================================\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Classify a PDF as useful or not useful.")
