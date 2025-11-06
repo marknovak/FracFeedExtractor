@@ -38,6 +38,7 @@ def load_labeled_data(data_dir="data/processed-text", labels_file="data/labels.j
             print(f"[WARN] No label found for {fname}, skipping.")
     return texts, labels, filenames
 
+
 # Trains and save a scikit-learn classification model.
 def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
     # Split the dataset into training and testing sets (stratified by label ratio)
@@ -50,7 +51,7 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
 
     # Initialize a logistic regression classifier
     model = LogisticRegression(max_iter=100000, solver="liblinear")
-    model.fit(X_train_vec, y_train) # Train the model
+    model.fit(X_train_vec, y_train)  # Train the model
 
     # Evaluate model performance
     y_pred = model.predict(X_test_vec)
@@ -66,6 +67,7 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
     joblib.dump(vectorizer, Path(output_dir) / "tfidf_vectorizer.pkl")
 
     return {"accuracy": acc}
+
 
 if __name__ == "__main__":
     texts, labels, _ = load_labeled_data()
