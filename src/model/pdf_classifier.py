@@ -6,6 +6,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 from src.preprocessing.pdf_text_extraction import extract_text_from_pdf
 
+
 # Classify a single PDF as useful or not useful based on its text content.
 def classify_pdf(pdf_path, model_dir="src/model/model-config"):
     model_path = Path(model_dir) / "pdf_classifier_model.pkl"
@@ -35,6 +36,7 @@ def classify_pdf(pdf_path, model_dir="src/model/model-config"):
     print(f" File:        {Path(pdf_path).name}")
     print(f" Prediction:  {prediction.capitalize()} ({confidence:.2%} confidence)")
     print("=================================\n")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Classify a PDF as useful or not useful.")
