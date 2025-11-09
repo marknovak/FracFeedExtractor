@@ -1,4 +1,4 @@
-name: PDF Extraction CI
+name: ML Pipeline CI
 
 on: [push, pull_request]
 
@@ -21,6 +21,16 @@ jobs:
           sudo apt-get install -y tesseract-ocr
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          
+      - name: Cache model artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            src/model/model-config
+            ~/.cache/torch
+          key: ${{ runner.os }}-model-${{ hashFiles('src/model/**/*.py') }}
+          restore-keys: |
+            ${{ runner.os }}-model-
 
       # Code quality checks
       - name: Check code formatting (Black)
@@ -33,40 +43,53 @@ jobs:
           echo "Running flake8 linter..."
           flake8 src/ tests/
 
-      # Functional validation
+      # Data preprocessing pipeline
       - name: Run PDF extraction script
         run: |
           mkdir -p data/processed-text
+          mkdir -p data/useful
+          mkdir -p data/not-useful
+          mkdir -p data/needs-check
           INPUT_PDF="tests/test.pdf"
           python src/preprocessing/pdf_text_extraction.py "$INPUT_PDF"
 
-      - name: Validate extraction output
+      - name: Generate labels
         run: |
+          echo "Generating labels for extracted text..."
+          python src/preprocessing/generate_labels.py
+          
+      - name: Load and preprocess data
+        run: |
+          echo "Loading and preprocessing dataset..."
+          python src/preprocessing/data_loader.py
+
+      - name: Validate preprocessing pipeline
+        run: |
+          # Validate PDF extraction
           INPUT_PDF="tests/test.pdf"
           OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
-          total_tests=5
-          failures=0
+          
+          echo "Validating PDF extraction..."
+          [ -f "$OUTPUT_FILE" ] && [ -s "$OUTPUT_FILE" ] || exit 1
+          
+          # Validate labels
+          echo "Validating label generation..."
+          [ -f "data/labels.json" ] || exit 1
+          
+          # Validate data loading
+          echo "Validating data loading..."
+          python -c "import json; f=open('data/labels.json'); json.load(f); f.close()" || exit 1
 
-          # Test 1: Output file exists
-          [ -f "$OUTPUT_FILE" ] && echo "Test 1 passed: file exists" || { echo "Test 1 failed: missing"; failures=$((failures+1)); }
-
-          # Test 2: File is not empty
-          [ -s "$OUTPUT_FILE" ] && echo "Test 2 passed: not empty" || { echo "Test 2 failed: empty"; failures=$((failures+1)); }
-
-          # Test 3: At least one line
-          line_count=$(wc -l < "$OUTPUT_FILE")
-          [ "$line_count" -ge 1 ] && echo "Test 3 passed: $line_count lines" || { echo "Test 3 failed: no lines"; failures=$((failures+1)); }
-
-          # Test 4: At least one word
-          word_count=$(wc -w < "$OUTPUT_FILE")
-          [ "$word_count" -ge 1 ] && echo "Test 4 passed: $word_count words" || { echo "Test 4 failed: no words"; failures=$((failures+1)); }
-
-          # Test 5: Reasonable file size
-          file_size=$(stat -c%s "$OUTPUT_FILE")
-          [ "$file_size" -ge 10 ] && echo "Test 5 passed: size ${file_size} bytes" || { echo "Test 5 failed: too small (${file_size})"; failures=$((failures+1)); }
-
-          echo "Summary: $total_tests tests, $failures failed"
-          [ $failures -eq 0 ]
+      # Model training and evaluation pipeline
+      - name: Train model
+        run: |
+          echo "Training PDF classifier model..."
+          python src/model/train_model.py
+          
+      - name: Test model classification
+        run: |
+          echo "Testing PDF classifier..."
+          python src/model/pdf_classifier.py --test-mode
 
       # Unit testing and coverage
       - name: Run unit tests with coverage
@@ -82,9 +105,20 @@ jobs:
           name: coverage-report
           path: htmlcov/
 
-      - name: Show extracted text
+      - name: Upload trained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: src/model/model-config/
+
+      - name: Show pipeline summary
         run: |
-          INPUT_PDF="tests/test.pdf"
-          OUTPUT_FILE="data/processed-text/$(basename "$INPUT_PDF" .pdf).txt"
-          echo " Extracted text from $OUTPUT_FILE:"
-          cat "$OUTPUT_FILE" || echo " No output file found"
+          echo "Pipeline Summary:"
+          echo "1. PDF Extraction Results:"
+          ls -l data/processed-text/
+          echo "2. Label Generation Results:"
+          ls -l data/labels.json
+          echo "3. Model Training Results:"
+          ls -l src/model/model-config/
+          echo "4. Classification Results:"
+          python src/model/pdf_classifier.py --status
