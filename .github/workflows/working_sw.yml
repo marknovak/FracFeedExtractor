@@ -27,10 +27,11 @@ jobs:
         with:
           path: |
             src/model/model-config
-            ~/.cache/torch
-          key: ${{ runner.os }}-model-${{ hashFiles('src/model/**/*.py') }}
+            ~/.joblib
+            ~/.sklearn
+          key: ${{ runner.os }}-sklearn-model-${{ hashFiles('src/model/**/*.py') }}
           restore-keys: |
-            ${{ runner.os }}-model-
+            ${{ runner.os }}-sklearn-model-
 
       # Code quality checks
       - name: Check code formatting (Black)
