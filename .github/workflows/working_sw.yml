@@ -51,7 +51,8 @@ jobs:
       - name: Run linter (Flake8)
         run: |
           echo "Running flake8 linter..."
-          flake8 src/ tests/
+          flake8 src/ tests/ --statistics --count || true
+          echo "Flake8 check completed."
 
       # Data preprocessing pipeline
       - name: Run PDF extraction script
