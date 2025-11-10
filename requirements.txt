@@ -1,7 +1,10 @@
 pymupdf
 pillow
 pytesseract
+tesseract
 pytest
 coverage
 flake8==6.1.0
 black==25.9.0
+scikit-learn
+dotenv
