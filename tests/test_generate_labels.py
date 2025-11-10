@@ -24,7 +24,7 @@ def test_generate_labels_creates_json(tmp_path):
     with open(output_file, "r", encoding="utf-8") as f:
         labels = json.load(f)
 
-    assert "useful.pdf" in labels
+    assert "useful.txt" in labels
     assert "not-useful.txt" in labels
     assert labels["useful.pdf"] == "useful"
     assert labels["not-useful.txt"] == "not useful"

@@ -75,8 +75,8 @@ def test_train_pdf_classifier_handles_empty_data(capsys):
 
 
 def test_train_pdf_classifier_one_class(capsys):
-    texts = ["diet info", "feeding study", "predator stomachs"]
-    labels = ["useful", "useful", "useful"]
+    texts = ["predator stomach analysis", "diet prey composition"]
+    labels = ["useful", "useful"]
 
     result = train_pdf_classifier(texts, labels)
     captured = capsys.readouterr()
@@ -86,7 +86,8 @@ def test_train_pdf_classifier_one_class(capsys):
 
 def test_train_pdf_classifier_too_few_per_class(capsys):
     texts = ["useful text", "not useful text"]
-    labels = ["useful", "not-useful", "not-useful"][:2]  # one per class
+    labels = ["useful", "not useful"]
+
     result = train_pdf_classifier(texts, labels)
     captured = capsys.readouterr()
     assert result is None

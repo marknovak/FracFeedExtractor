@@ -1,6 +1,9 @@
 import pytest
 import joblib
 from pathlib import Path
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+from sklearn.feature_extraction.text import CountVectorizer
 from unittest.mock import patch, MagicMock
 from src.model.pdf_classifier import classify_pdf
 
@@ -11,12 +14,16 @@ def model_dir_with_mock_model(tmp_path):
     model_dir.mkdir(parents=True)
 
     # Create a mock model and vectorizer
-    mock_model = MagicMock()
-    mock_model.predict.return_value = ["useful"]
-    mock_model.predict_proba.return_value = [[0.2, 0.8]]
+    mock_model = LogisticRegression()
+    mock_model.classes_ = np.array(["not useful", "useful"])
 
-    mock_vectorizer = MagicMock()
-    mock_vectorizer.transform.return_value = "fake_transformed_data"
+    # Fit with dummy data so it can actually predict
+    X = np.array([[0, 1], [1, 0]])
+    y = np.array(["useful", "not useful"])
+    mock_model.fit(X, y)
+
+    mock_vectorizer = CountVectorizer()
+    mock_vectorizer.fit(["diet predator prey stomach"])
 
     # Save mock objects
     joblib.dump(mock_model, model_dir / "pdf_classifier_model.pkl")
