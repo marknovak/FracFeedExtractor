@@ -18,7 +18,7 @@ def classify_pdf(pdf_path, model_dir="src/model/model-config"):
         return
 
     model = joblib.load(model_path)
-    vectorizer = joblib.load(vectorizer_path)
+    vectorizer = joblib.load(vectorizer_path) 
 
     # Extract text from PDF
     text = extract_text_from_pdf(pdf_path)
