@@ -15,6 +15,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 import joblib
 import json
+import sys
+from collections import Counter
 
 
 # Load processed text files and their useful vs not useful labels.
@@ -41,8 +43,27 @@ def load_labeled_data(data_dir="data/processed-text", labels_file="data/labels.j
 
 # Trains and save a scikit-learn classification model.
 def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
+    # Basic validations
+    if not texts or not labels:
+        print("[ERROR] No training samples found. Ensure PDFs were extracted to text before training.")
+        return None
+
+    class_counts = Counter(labels)
+    if len(class_counts) < 2:
+        print(f"[ERROR] Need at least 2 classes to train classifier. Found: {class_counts}")
+        return None
+
+    if any(c < 2 for c in class_counts.values()):
+        print(f"[ERROR] Each class needs at least 2 samples for stratified split. Counts: {class_counts}")
+        return None
     # Split the dataset into training and testing sets (stratified by label ratio)
-    X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=0.2, random_state=42, stratify=labels)
+    try:
+        X_train, X_test, y_train, y_test = train_test_split(
+            texts, labels, test_size=0.2, random_state=42, stratify=labels
+        )
+    except ValueError as e:
+        print(f"[ERROR] train_test_split failed: {e}")
+        return None
 
     # Convert text data into TF-IDF features
     vectorizer = TfidfVectorizer(max_features=10000, stop_words="english", ngram_range=(1, 3))
@@ -71,5 +92,7 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
 
 if __name__ == "__main__":
     texts, labels, _ = load_labeled_data()
-    metrics = train_pdf_classifier(texts, labels, "src/model/models")
-    print(f"Model trained successfully! Accuracy: {metrics['accuracy']:.2f}")
+    result = train_pdf_classifier(texts, labels, "src/model/models")
+    if result is None:
+        sys.exit(1)
+    print(f"Model trained successfully! Accuracy: {result['accuracy']:.2f}")
