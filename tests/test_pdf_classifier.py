@@ -3,6 +3,7 @@ import joblib
 from pathlib import Path
 from sklearn.linear_model import LogisticRegression
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from unittest.mock import patch, MagicMock
 from src.model.pdf_classifier import classify_pdf
@@ -13,21 +14,15 @@ def model_dir_with_mock_model(tmp_path):
     model_dir = tmp_path / "models"
     model_dir.mkdir(parents=True)
 
-    # Create a mock model and vectorizer
-    mock_model = LogisticRegression()
-    mock_model.classes_ = np.array(["not useful", "useful"])
+    texts = ["predator stomach content", "fish prey analysis", "rock study geology", "mineral content paper"]
+    labels = ["useful", "useful", "not useful", "not useful"]
 
-    # Fit with dummy data so it can actually predict
-    X = np.array([[0, 1], [1, 0]])
-    y = np.array(["useful", "not useful"])
-    mock_model.fit(X, y)
+    vectorizer = TfidfVectorizer(max_features=4)
+    X = vectorizer.fit_transform(texts)
+    model = LogisticRegression().fit(X, labels)
 
-    mock_vectorizer = CountVectorizer()
-    mock_vectorizer.fit(["diet predator prey stomach"])
-
-    # Save mock objects
-    joblib.dump(mock_model, model_dir / "pdf_classifier_model.pkl")
-    joblib.dump(mock_vectorizer, model_dir / "tfidf_vectorizer.pkl")
+    joblib.dump(model, model_dir / "pdf_classifier_model.pkl")
+    joblib.dump(vectorizer, model_dir / "tfidf_vectorizer.pkl")
 
     return model_dir
 

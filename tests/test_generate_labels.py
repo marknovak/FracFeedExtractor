@@ -26,7 +26,7 @@ def test_generate_labels_creates_json(tmp_path):
 
     assert "useful.txt" in labels
     assert "not-useful.txt" in labels
-    assert labels["useful.pdf"] == "useful"
+    assert labels["useful.txt"] == "useful"
     assert labels["not-useful.txt"] == "not useful"
     assert len(labels) == 2
 
@@ -78,17 +78,25 @@ def test_generate_labels_cli(tmp_path):
     (useful_dir / "CLI_Test.pdf").touch()
     (not_useful_dir / "CLI_Not.pdf").touch()
 
+    import shutil
+
+    repo_src = Path("src")
+    tmp_src = tmp_path / "src"
+    shutil.copytree(repo_src, tmp_src)
+
     result = subprocess.run(
         ["python", "src/preprocessing/generate_labels.py"],
         capture_output=True,
         text=True,
-        cwd=Path("."),
+        cwd=tmp_path,
     )
-    assert result.returncode == 0
+
+    assert result.returncode == 0, f"CLI failed with error:\n{result.stderr}"
     assert "labels.json created" in result.stdout
 
-    output_file = Path("data/labels.json")
-    assert output_file.exists()
+    output_file = tmp_path / "data" / "labels.json"
+    assert output_file.exists(), "labels.json should be created in tmp_path/data"
+
     labels = json.loads(output_file.read_text(encoding="utf-8"))
     assert "CLI_Test.txt" in labels
     assert "CLI_Not.txt" in labels
