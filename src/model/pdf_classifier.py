@@ -8,7 +8,7 @@ from src.preprocessing.pdf_text_extraction import extract_text_from_pdf
 
 
 # Classify a single PDF as useful or not useful based on its text content.
-def classify_pdf(pdf_path, model_dir="src/model/model-config"):
+def classify_pdf(pdf_path, model_dir="src/model/models"):
     model_path = Path(model_dir) / "pdf_classifier_model.pkl"
     vectorizer_path = Path(model_dir) / "tfidf_vectorizer.pkl"
 
@@ -41,7 +41,7 @@ def classify_pdf(pdf_path, model_dir="src/model/model-config"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Classify a PDF as useful or not useful.")
     parser.add_argument("--pdf-path", type=str, help="Path to the PDF file to classify.")
-    parser.add_argument("--model_dir", type=str, default="src/model/model-config", help="Directory containing the trained model and TF-IDF vectorizer.")
+    parser.add_argument("--model_dir", type=str, default="src/model/models", help="Directory containing the trained model and TF-IDF vectorizer.")
     args = parser.parse_args()
 
     classify_pdf(args.pdf_path, args.model_dir)

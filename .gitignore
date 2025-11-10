@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Data
+data/needs-check
+data/not-useful
+data/processed-text
+data/useful
+
+
