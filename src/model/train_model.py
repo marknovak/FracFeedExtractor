@@ -58,9 +58,7 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
         return None
     # Split the dataset into training and testing sets (stratified by label ratio)
     try:
-        X_train, X_test, y_train, y_test = train_test_split(
-            texts, labels, test_size=0.2, random_state=42, stratify=labels
-        )
+        X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=0.2, random_state=42, stratify=labels)
     except ValueError as e:
         print(f"[ERROR] train_test_split failed: {e}")
         return None
