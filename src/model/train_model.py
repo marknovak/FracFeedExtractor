@@ -69,9 +69,7 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
         # For tiny datasets, attempt a 50/50 split; if that fails, fall back to train-only.
         test_size = 0.5
     try:
-        X_train, X_test, y_train, y_test = train_test_split(
-            texts, labels, test_size=test_size, random_state=42, stratify=labels
-        )
+        X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=test_size, random_state=42, stratify=labels)
     except ValueError as e:
         print(f"[WARN] Stratified split failed on tiny dataset: {e} — training on all data without evaluation.")
         perform_eval = False

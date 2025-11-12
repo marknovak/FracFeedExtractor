@@ -50,10 +50,12 @@ def find_child_folder_id(service, parent_id: str, name: str) -> Optional[str]:
         "pageSize": 10,
     }
     if _use_all_drives():
-        params.update({
-            "supportsAllDrives": True,
-            "includeItemsFromAllDrives": True,
-        })
+        params.update(
+            {
+                "supportsAllDrives": True,
+                "includeItemsFromAllDrives": True,
+            }
+        )
     resp = service.files().list(**params).execute()
     files = resp.get("files", [])
     return files[0]["id"] if files else None
@@ -68,10 +70,12 @@ def list_pdfs_in_folder(service, folder_id: str, max_files: Optional[int] = None
         "orderBy": "modifiedTime desc" if order_desc else "modifiedTime",
     }
     if _use_all_drives():
-        params.update({
-            "supportsAllDrives": True,
-            "includeItemsFromAllDrives": True,
-        })
+        params.update(
+            {
+                "supportsAllDrives": True,
+                "includeItemsFromAllDrives": True,
+            }
+        )
 
     results: List[Dict] = []
     while True:

@@ -19,9 +19,11 @@ import subprocess
 
 import sys
 from pathlib import Path as _Path
+
 sys.path.append(str(_Path(__file__).resolve().parents[1]))  # add repo root to sys.path
 
 from scripts.env_loader import load_env
+
 load_env()  # Load .env file if present (for local dev)
 
 from scripts.drive_io import (
@@ -50,7 +52,7 @@ def main():
     print("Connecting to Google Drive...")
     service = get_drive_service()
     print("Connected to Google Drive")
-    
+
     print(f"Looking for 'useful' and 'not-useful' folders under root {root_id}...")
     useful_id = find_child_folder_id(service, root_id, "useful")
     not_useful_id = find_child_folder_id(service, root_id, "not-useful")

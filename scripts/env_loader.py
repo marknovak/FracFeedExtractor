@@ -8,8 +8,9 @@ def load_env():
     env_file = Path(__file__).resolve().parents[1] / ".env"
     if not env_file.exists():
         return  # No .env file, assume env vars set manually or in CI
-    
+
     import os
+
     with env_file.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
