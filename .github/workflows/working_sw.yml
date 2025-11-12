@@ -24,23 +24,23 @@ jobs:
         # OPTIONAL: Uncomment below after adding GOOGLE_SERVICE_ACCOUNT_JSON secret
         # (Service Account JSON contents) to repo settings OR loading via .env.
         # This step would download PDFs from a shared Google Drive folder.
-        # - name: Download training PDFs (Google Drive)
-        #   env:
-        #     GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-        #   run: |
-        #     python scripts/download_from_drive.py
-        #
+      - name: Download training PDFs (Google Drive)
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python scripts/download_from_drive.py
+        
         # OPTIONAL: Model cache and artifacts (commented until enabled)
-        # - name: Cache model artifacts
-        #   uses: actions/cache@v3
-        #   with:
-        #     path: |
-        #       src/model/models
-        #       ~/.joblib
-        #       ~/.sklearn
-        #     key: ${{ runner.os }}-sklearn-model-${{ hashFiles('src/model/**/*.py') }}
-        #     restore-keys: |
-        #       ${{ runner.os }}-sklearn-model-
+      - name: Cache model artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            src/model/models
+            ~/.joblib
+            ~/.sklearn
+          key: ${{ runner.os }}-sklearn-model-${{ hashFiles('src/model/**/*.py') }}
+          restore-keys: |
+            ${{ runner.os }}-sklearn-model-
 
       # Code quality checks
       - name: Check code formatting (Black)
@@ -92,12 +92,12 @@ jobs:
           python -c "import json; f=open('data/labels.json'); json.load(f); f.close()" || exit 1
 
       # Model workflow temporarily disabled (training & classification skipped)
-      # - name: Train model
-      #   run: |
-      #     python src/model/train_model.py
-      # - name: Test model classification
-      #   run: |
-      #     python src/model/pdf_classifier.py --pdf-path "tests/test.pdf" --model_dir "src/model/models"
+      - name: Train model
+        run: |
+          python src/model/train_model.py
+      - name: Test model classification
+        run: |
+          python src/model/pdf_classifier.py --pdf-path "tests/test.pdf" --model_dir "src/model/models"
 
       # Unit testing and coverage
       - name: Run unit tests with coverage
@@ -114,13 +114,13 @@ jobs:
           path: htmlcov/
 
       # OPTIONAL: Upload trained model artifacts (enable once model steps are active)
-      # - name: Upload trained model
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: trained-model
-      #     path: |
-      #       src/model/models/pdf_classifier_model.pkl
-      #       src/model/models/tfidf_vectorizer.pkl
+      - name: Upload trained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: |
+            src/model/models/pdf_classifier_model.pkl
+            src/model/models/tfidf_vectorizer.pkl
 
       - name: Show pipeline summary
         run: |
