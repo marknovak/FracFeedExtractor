@@ -64,12 +64,15 @@ def main():
     for folder_id, label in [(useful_id, "useful"), (not_useful_id, "not useful")]:
         files = list_pdfs_in_folder(service, folder_id, max_files=per_class)
         for f in files:
+            pdf_name = f.get("name", f.get("id", "file"))
+            print(f"[CI] Processing: {pdf_name} ({label})")
             pdf_bytes = download_file_bytes(service, f["id"])
             text = extract_text_from_pdf_bytes(pdf_bytes)
-            stem = sanitize_filename(f.get("name", f.get("id", "file")))
+            stem = sanitize_filename(pdf_name)
             txt_name = f"{stem}.txt"
             (out_dir / txt_name).write_text(text, encoding="utf-8")
             labels[txt_name] = label
+            print(f"[CI]   ✓ Extracted to {txt_name}")
 
     write_labels(labels, Path("data/labels.json"))
     print(f"[CI] Wrote {len(labels)} labels and extracted text files to {out_dir}")
