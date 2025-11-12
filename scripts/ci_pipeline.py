@@ -45,55 +45,55 @@ def main():
     if not root_id:
         raise RuntimeError("Missing GOOGLE_DRIVE_ROOT_FOLDER_ID environment variable")
 
-    per_class = 20  # Fixed set size for CI
+    per_class = 5  # Fixed set size for CI
 
-    print("[CI] Connecting to Google Drive...")
+    print("Connecting to Google Drive...")
     service = get_drive_service()
-    print("[CI] Connected to Google Drive")
+    print("Connected to Google Drive")
     
-    print(f"[CI] Looking for 'useful' and 'not-useful' folders under root {root_id}...")
+    print(f"Looking for 'useful' and 'not-useful' folders under root {root_id}...")
     useful_id = find_child_folder_id(service, root_id, "useful")
     not_useful_id = find_child_folder_id(service, root_id, "not-useful")
     if not useful_id:
         raise RuntimeError(f"Could not find 'useful' subfolder under root folder {root_id}")
     if not not_useful_id:
         raise RuntimeError(f"Could not find 'not-useful' subfolder under root folder {root_id}")
-    print(f"[CI] Found both folders (useful: {useful_id}, not-useful: {not_useful_id})")
+    print(f"Found both folders (useful: {useful_id}, not-useful: {not_useful_id})")
 
     # Prepare output directory
     out_dir = Path("data/processed-text")
     out_dir.mkdir(parents=True, exist_ok=True)
-    print(f"[CI] Output directory ready: {out_dir}")
+    print(f"Output directory ready: {out_dir}")
 
     labels: Dict[str, str] = {}
 
     for folder_id, label in [(useful_id, "useful"), (not_useful_id, "not useful")]:
-        print(f"\n[CI] Processing '{label}' folder (max {per_class} PDFs)...")
+        print(f"\nProcessing '{label}' folder (max {per_class} PDFs)...")
         files = list_pdfs_in_folder(service, folder_id, max_files=per_class)
-        print(f"[CI] Found {len(files)} PDFs in '{label}' folder")
+        print(f"Found {len(files)} PDFs in '{label}' folder")
         for idx, f in enumerate(files, 1):
             pdf_name = f.get("name", f.get("id", "file"))
-            print(f"[CI] [{idx}/{len(files)}] Processing: {pdf_name}")
+            print(f"[{idx}/{len(files)}] Processing: {pdf_name}")
             pdf_bytes = download_file_bytes(service, f["id"])
-            print(f"[CI]   Downloaded {len(pdf_bytes)} bytes")
+            print(f"Downloaded {len(pdf_bytes)} bytes")
             text = extract_text_from_pdf_bytes(pdf_bytes)
             stem = sanitize_filename(pdf_name)
             txt_name = f"{stem}.txt"
             (out_dir / txt_name).write_text(text, encoding="utf-8")
             labels[txt_name] = label
-            print(f"[CI]   ✓ Extracted {len(text)} chars to {txt_name}")
+            print(f"Extracted {len(text)} chars to {txt_name}")
 
     write_labels(labels, Path("data/labels.json"))
-    print(f"\n[CI] ✓ Wrote {len(labels)} labels to data/labels.json")
-    print(f"[CI] ✓ Extracted {len(labels)} text files to {out_dir}")
+    print(f"\nWrote {len(labels)} labels to data/labels.json")
+    print(f"Extracted {len(labels)} text files to {out_dir}")
 
     # Train model on the CI sample
-    print("\n[CI] Starting model training on CI sample...")
+    print("\nStarting model training on CI sample...")
     r = subprocess.run([sys.executable, "src/model/train_model.py"], env={**os.environ, "CI_TRAIN": "1"})
     if r.returncode != 0:
-        print("[CI] ✗ Model training failed")
+        print("Model training failed")
         raise SystemExit(r.returncode)
-    print("[CI] ✓ Model training complete")
+    print("Model training complete")
 
 
 if __name__ == "__main__":
