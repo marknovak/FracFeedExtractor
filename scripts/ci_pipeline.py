@@ -47,41 +47,53 @@ def main():
 
     per_class = 20  # Fixed set size for CI
 
+    print("[CI] Connecting to Google Drive...")
     service = get_drive_service()
+    print("[CI] Connected to Google Drive")
+    
+    print(f"[CI] Looking for 'useful' and 'not-useful' folders under root {root_id}...")
     useful_id = find_child_folder_id(service, root_id, "useful")
     not_useful_id = find_child_folder_id(service, root_id, "not-useful")
     if not useful_id:
         raise RuntimeError(f"Could not find 'useful' subfolder under root folder {root_id}")
     if not not_useful_id:
         raise RuntimeError(f"Could not find 'not-useful' subfolder under root folder {root_id}")
+    print(f"[CI] Found both folders (useful: {useful_id}, not-useful: {not_useful_id})")
 
     # Prepare output directory
     out_dir = Path("data/processed-text")
     out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[CI] Output directory ready: {out_dir}")
 
     labels: Dict[str, str] = {}
 
     for folder_id, label in [(useful_id, "useful"), (not_useful_id, "not useful")]:
+        print(f"\n[CI] Processing '{label}' folder (max {per_class} PDFs)...")
         files = list_pdfs_in_folder(service, folder_id, max_files=per_class)
-        for f in files:
+        print(f"[CI] Found {len(files)} PDFs in '{label}' folder")
+        for idx, f in enumerate(files, 1):
             pdf_name = f.get("name", f.get("id", "file"))
-            print(f"[CI] Processing: {pdf_name} ({label})")
+            print(f"[CI] [{idx}/{len(files)}] Processing: {pdf_name}")
             pdf_bytes = download_file_bytes(service, f["id"])
+            print(f"[CI]   Downloaded {len(pdf_bytes)} bytes")
             text = extract_text_from_pdf_bytes(pdf_bytes)
             stem = sanitize_filename(pdf_name)
             txt_name = f"{stem}.txt"
             (out_dir / txt_name).write_text(text, encoding="utf-8")
             labels[txt_name] = label
-            print(f"[CI]   ✓ Extracted to {txt_name}")
+            print(f"[CI]   ✓ Extracted {len(text)} chars to {txt_name}")
 
     write_labels(labels, Path("data/labels.json"))
-    print(f"[CI] Wrote {len(labels)} labels and extracted text files to {out_dir}")
+    print(f"\n[CI] ✓ Wrote {len(labels)} labels to data/labels.json")
+    print(f"[CI] ✓ Extracted {len(labels)} text files to {out_dir}")
 
     # Train model on the CI sample
-    print("[CI] Training model on CI sample...")
+    print("\n[CI] Starting model training on CI sample...")
     r = subprocess.run([sys.executable, "src/model/train_model.py"], env={**os.environ, "CI_TRAIN": "1"})
     if r.returncode != 0:
+        print("[CI] ✗ Model training failed")
         raise SystemExit(r.returncode)
+    print("[CI] ✓ Model training complete")
 
 
 if __name__ == "__main__":
