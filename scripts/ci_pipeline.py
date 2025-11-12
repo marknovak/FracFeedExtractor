@@ -41,29 +41,36 @@ def write_labels(labels: Dict[str, str], output_file: Path):
 
 
 def main():
+    print("[CI] Starting CI pipeline...", flush=True)
+    print(f"[CI] Checking environment variables...", flush=True)
+    
     root_id = os.environ.get("GOOGLE_DRIVE_ROOT_FOLDER_ID")
     if not root_id:
         raise RuntimeError("Missing GOOGLE_DRIVE_ROOT_FOLDER_ID environment variable")
+    print(f"[CI] ✓ GOOGLE_DRIVE_ROOT_FOLDER_ID is set", flush=True)
+    
+    has_creds = bool(os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON"))
+    print(f"[CI] ✓ GOOGLE_SERVICE_ACCOUNT_JSON is {'set' if has_creds else 'MISSING'}", flush=True)
 
     per_class = 20  # Fixed set size for CI
 
-    print("[CI] Connecting to Google Drive...")
+    print("[CI] Connecting to Google Drive...", flush=True)
     service = get_drive_service()
-    print("[CI] Connected to Google Drive")
+    print("[CI] ✓ Connected to Google Drive", flush=True)
     
-    print(f"[CI] Looking for 'useful' and 'not-useful' folders under root {root_id}...")
+    print(f"[CI] Looking for 'useful' and 'not-useful' folders under root {root_id}...", flush=True)
     useful_id = find_child_folder_id(service, root_id, "useful")
     not_useful_id = find_child_folder_id(service, root_id, "not-useful")
     if not useful_id:
         raise RuntimeError(f"Could not find 'useful' subfolder under root folder {root_id}")
     if not not_useful_id:
         raise RuntimeError(f"Could not find 'not-useful' subfolder under root folder {root_id}")
-    print(f"[CI] Found both folders (useful: {useful_id}, not-useful: {not_useful_id})")
+    print(f"[CI] ✓ Found both folders (useful: {useful_id}, not-useful: {not_useful_id})", flush=True)
 
     # Prepare output directory
     out_dir = Path("data/processed-text")
     out_dir.mkdir(parents=True, exist_ok=True)
-    print(f"[CI] Output directory ready: {out_dir}")
+    print(f"[CI] ✓ Output directory ready: {out_dir}", flush=True)
 
     labels: Dict[str, str] = {}
 
