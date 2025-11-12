@@ -57,22 +57,25 @@ jobs:
       # Data preprocessing pipeline
       - name: Run PDF extraction script
         run: |
-          mkdir -p data/processed-text
-          mkdir -p data/useful
-          mkdir -p data/not-useful
-          mkdir -p data/needs-check
+          # mkdir -p data/processed-text
+          # mkdir -p data/useful
+          # mkdir -p data/not-useful
+          # mkdir -p data/needs-check
           INPUT_PDF="tests/test.pdf"
           python src/preprocessing/pdf_text_extraction.py "$INPUT_PDF"
 
-      - name: Generate labels
-        run: |
-          echo "Generating labels for extracted text..."
-          python src/preprocessing/generate_labels.py
+      # - name: Generate labels
+      #   run: |
+      #     echo "Generating labels for extracted text..."
+      #     python src/preprocessing/generate_labels.py
           
-      - name: Load and preprocess data
-        run: |
-          echo "Loading and preprocessing dataset..."
-          python src/preprocessing/data_loader.py
+      # - name: Load and preprocess data
+      #   run: |
+      #     echo "Loading and preprocessing dataset..."
+      #     python src/preprocessing/data_loader.py
+      - name: Run full pipeline
+        run: | 
+            python scripts/run_pipeline.py
 
       - name: Validate preprocessing pipeline
         run: |
