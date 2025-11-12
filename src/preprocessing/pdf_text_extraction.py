@@ -48,6 +48,26 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     return "\n".join(text)
 
 
+def extract_text_from_pdf_bytes(data: bytes) -> str:
+    """Extract text from an in-memory PDF without writing the PDF to disk."""
+    text = []
+    try:
+        with fitz.open(stream=data, filetype="pdf") as doc:
+            for page_num, page in enumerate(doc, start=1):
+                page_text = page.get_text("text")
+                if "\x00" in page_text:
+                    page_text = page_text.replace("\x00", "")
+                if not page_text.strip():
+                    pix = page.get_pixmap(dpi=300)
+                    img = Image.open(io.BytesIO(pix.tobytes("png")))
+                    page_text = pytesseract.image_to_string(img)
+                text.append(page_text)
+    except Exception as e:
+        print(f"[ERROR] Failed to extract text from PDF bytes: {e}", file=sys.stderr)
+        return ""
+    return "\n".join(text)
+
+
 # Save extracted text to a file.
 def save_to_file(text: str, output_path: str):
     try:
