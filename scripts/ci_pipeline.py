@@ -26,7 +26,7 @@ from scripts.env_loader import load_env
 
 load_env()  # Load .env file if present (for local dev)
 
-from scripts.drive_io import (
+from scripts.google_drive.drive_io import (
     get_drive_service,
     find_child_folder_id,
     list_pdfs_in_folder,
