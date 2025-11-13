@@ -27,9 +27,25 @@ All contributors must follow the Oregon State University Student Code of Conduct
     pip install -r requirements.txt
 ```
 * ### Running the application
-```
-    python src/main.py
-```
+  * If you do have the [dataset](https://drive.google.com/drive/u/2/folders/1U3_-TmnXnuBPR9vukkyV-3ITsxPr-nfo) downloaded locally on your machine:
+    ```
+    python scripts/full_pipeline.py --local <file_path_to_dataset>
+    ```
+    * Note: Your local dataset folder should be formatted like so:
+      ```
+      folder
+        |-> useful
+            |-> pdfs
+            |-> ...
+        |-> not-useful
+            |-> pdfs
+            |-> ...
+      ```
+  * If you do not have the dataset downloaded or cannot have it on your locally on your machine:
+    ```
+    python scripts/full_pipeline.py --api
+    ```
+    * Note: You will need access to the .env file
 * ### Enviorment Variables
     * Sensitive information such as API keys will be stored in a local .env file which will be excluded by .gitignore.
     * Never hardcode secrets
