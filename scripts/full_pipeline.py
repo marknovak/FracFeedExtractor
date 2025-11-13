@@ -1,21 +1,12 @@
 """Full training pipeline: stream ALL PDFs from Drive, extract text, label, train model.
 
-Modes:
- - API mode: Download PDFs from Google Drive and process them
- - Local mode: Use PDFs already downloaded locally
-
-API Mode Environment variables:
+Environment variables:
  - GOOGLE_SERVICE_ACCOUNT_JSON (service account JSON string)
  - GOOGLE_DRIVE_ROOT_FOLDER_ID (root folder containing 'useful' and 'not-useful')
  - GOOGLE_DRIVE_USE_SHARED_DRIVE=true (if using shared drives / shared folders)
 
-Usage:
- - API mode: python full_pipeline.py --api
- - Local mode: python full_pipeline.py --local <path_to_pdfs>
-
 Behavior:
- - API mode: Streams every PDF (no local PDF persistence) and writes extracted text to data/processed-text.
- - Local mode: Processes PDFs from specified local directory (expects 'useful' and 'not-useful' subfolders).
+ - Streams every PDF (no local PDF persistence) and writes extracted text to data/processed-text.
  - Generates labels.json based on folder origin.
  - Trains model with src/model/train_model.py.
 """
@@ -24,7 +15,6 @@ from __future__ import annotations
 
 import os
 import json
-import argparse
 from pathlib import Path
 from typing import Dict
 import subprocess
@@ -39,7 +29,7 @@ from scripts.env_loader import load_env
 
 load_env()  # Load .env file if present (for local dev)
 
-from scripts.google_drive.drive_io import (
+from scripts.drive_io import (
     get_drive_service,
     find_child_folder_id,
     list_pdfs_in_folder,
@@ -62,8 +52,7 @@ def write_labels(labels: Dict[str, str], output_file: Path):
         json.dump(labels, f, indent=2)
 
 
-def process_api_mode():
-    """Download PDFs from Google Drive and process them."""
+def main():
     root_id = os.environ.get("GOOGLE_DRIVE_ROOT_FOLDER_ID")
     if not root_id:
         raise RuntimeError("Missing GOOGLE_DRIVE_ROOT_FOLDER_ID environment variable")
@@ -79,10 +68,10 @@ def process_api_mode():
     out_dir = Path("data/processed-text")
     out_dir.mkdir(parents=True, exist_ok=True)
     labels: Dict[str, str] = {}
-    count=1
+
     for folder_id, label in [(useful_id, "useful"), (not_useful_id, "not-useful")]:
         files = list_pdfs_in_folder(service, folder_id, max_files=None)
-        print(f"Found {len(files)} PDFs in folder label '{label}'")
+        print(f"[FULL] Found {len(files)} PDFs in folder label '{label}'")
         for f in files:
             pdf_bytes = download_file_bytes(service, f["id"])
             text = extract_text_from_pdf_bytes(pdf_bytes)
@@ -90,89 +79,13 @@ def process_api_mode():
             txt_name = f"{stem}.txt"
             (out_dir / txt_name).write_text(text, encoding="utf-8")
             labels[txt_name] = label
-            print(f"{count} Processed {f['name']}")
-            count+=1
 
     write_labels(labels, Path("data/labels.json"))
-    print(f"Wrote {len(labels)} labeled text files.")
+    print(f"[FULL] Wrote {len(labels)} labeled text files. Beginning model training...")
 
-
-def process_local_mode(data_path: Path):
-    """Process PDFs from local directory."""
-    if not data_path.exists():
-        raise RuntimeError(f"Data path does not exist: {data_path}")
-    
-    useful_dir = data_path / "useful"
-    not_useful_dir = data_path / "not-useful"
-    
-    if not useful_dir.exists():
-        raise RuntimeError(f"'useful' subfolder not found in {data_path}")
-    if not not_useful_dir.exists():
-        raise RuntimeError(f"'not-useful' subfolder not found in {data_path}")
-    
-    out_dir = Path("data/processed-text")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    labels: Dict[str, str] = {}
-    
-    for folder, label in [(useful_dir, "useful"), (not_useful_dir, "not-useful")]:
-        pdf_files = list(folder.glob("*.pdf"))
-        print(f"Found {len(pdf_files)} PDFs in local folder '{label}'")
-        
-        for pdf_path in pdf_files:
-            try:
-                with open(pdf_path, "rb") as f:
-                    pdf_bytes = f.read()
-                text = extract_text_from_pdf_bytes(pdf_bytes)
-                stem = pdf_path.stem
-                txt_name = f"{stem}.txt"
-                (out_dir / txt_name).write_text(text, encoding="utf-8")
-                labels[txt_name] = label
-                print(f"Processed {pdf_path.name}")
-            except Exception as e:
-                print(f"Error processing {pdf_path.name}: {e}")
-                continue
-    
-    write_labels(labels, Path("data/labels.json"))
-    print(f"Wrote {len(labels)} labeled text files.")
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Full pipeline: extract text from PDFs and train model",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  API mode:   python full_pipeline.py --api
-  Local mode: python full_pipeline.py --local ./data/pdfs
-        """
-    )
-    
-    # Create mutually exclusive group for --api and --local
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "--api",
-        action="store_true",
-        help="Use API mode to download PDFs from Google Drive"
-    )
-    group.add_argument(
-        "--local",
-        type=Path,
-        metavar="PATH",
-        help="Use local mode with PDFs from specified directory (should contain 'useful' and 'not-useful' subfolders)"
-    )
-    
-    args = parser.parse_args()
-    
-    if args.local:
-        print(f"Running in LOCAL mode with data path: {args.local}")
-        process_local_mode(args.local)
-    else:  # args.api
-        print("Running in API mode (Google Drive)")
-        process_api_mode()
-    
-    print("Beginning model training...")
+    # Train model
     run([sys.executable, "src/model/train_model.py"])
-    print("Training complete.")
+    print("[FULL] Training complete.")
 
 
 if __name__ == "__main__":
