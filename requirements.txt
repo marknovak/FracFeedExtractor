@@ -8,4 +8,8 @@ flake8==6.1.0
 black==25.9.0
 scikit-learn
 dotenv
+google-auth 
+google-auth-oauthlib 
+google-auth-httplib2
 numpy
+google-api-python-client

@@ -21,26 +21,27 @@ jobs:
           sudo apt-get install -y tesseract-ocr
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-        # OPTIONAL: Uncomment below after adding GOOGLE_SERVICE_ACCOUNT_JSON secret
-        # (Service Account JSON contents) to repo settings OR loading via .env.
-        # This step would download PDFs from a shared Google Drive folder.
-        # - name: Download training PDFs (Google Drive)
-        #   env:
-        #     GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-        #   run: |
-        #     python scripts/download_from_drive.py
-        #
+      
+      # CI pipeline (streams 20 PDFs per class from Drive and trains model)
+      - name: CI pipeline (Drive stream)
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_ROOT_FOLDER_ID }}
+          PYTHONUNBUFFERED: 1
+        run: |
+          python -u scripts/ci_pipeline.py
+        
         # OPTIONAL: Model cache and artifacts (commented until enabled)
-        # - name: Cache model artifacts
-        #   uses: actions/cache@v3
-        #   with:
-        #     path: |
-        #       src/model/models
-        #       ~/.joblib
-        #       ~/.sklearn
-        #     key: ${{ runner.os }}-sklearn-model-${{ hashFiles('src/model/**/*.py') }}
-        #     restore-keys: |
-        #       ${{ runner.os }}-sklearn-model-
+      - name: Cache model artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            src/model/models
+            ~/.joblib
+            ~/.sklearn
+          key: ${{ runner.os }}-sklearn-model-${{ hashFiles('src/model/**/*.py') }}
+          restore-keys: |
+            ${{ runner.os }}-sklearn-model-
 
       # Code quality checks
       - name: Check code formatting (Black)
@@ -55,24 +56,22 @@ jobs:
           echo "Flake8 check completed."
 
       # Data preprocessing pipeline
-      - name: Run PDF extraction script
+      # Optional: still run a single-file extraction test on repo test asset
+      - name: Run PDF extraction script (repo test asset)
         run: |
-          mkdir -p data/processed-text
-          mkdir -p data/useful
-          mkdir -p data/not-useful
-          mkdir -p data/needs-check
           INPUT_PDF="tests/test.pdf"
           python src/preprocessing/pdf_text_extraction.py "$INPUT_PDF"
 
-      - name: Generate labels
-        run: |
-          echo "Generating labels for extracted text..."
-          python src/preprocessing/generate_labels.py
+      # - name: Generate labels
+      #   run: |
+      #     echo "Generating labels for extracted text..."
+      #     python src/preprocessing/generate_labels.py
           
-      - name: Load and preprocess data
-        run: |
-          echo "Loading and preprocessing dataset..."
-          python src/preprocessing/data_loader.py
+      # - name: Load and preprocess data
+      #   run: |
+      #     echo "Loading and preprocessing dataset..."
+      #     python src/preprocessing/data_loader.py
+      # No full pipeline here; use full_training_pipeline.py on main or a scheduled workflow
 
       - name: Validate preprocessing pipeline
         run: |
@@ -92,12 +91,7 @@ jobs:
           python -c "import json; f=open('data/labels.json'); json.load(f); f.close()" || exit 1
 
       # Model workflow temporarily disabled (training & classification skipped)
-      # - name: Train model
-      #   run: |
-      #     python src/model/train_model.py
-      # - name: Test model classification
-      #   run: |
-      #     python src/model/pdf_classifier.py --pdf-path "tests/test.pdf" --model_dir "src/model/models"
+      # Skip model training in CI for speed; exercised in full-training job on main/schedule
 
       # Unit testing and coverage
       - name: Run unit tests with coverage
@@ -114,13 +108,13 @@ jobs:
           path: htmlcov/
 
       # OPTIONAL: Upload trained model artifacts (enable once model steps are active)
-      # - name: Upload trained model
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: trained-model
-      #     path: |
-      #       src/model/models/pdf_classifier_model.pkl
-      #       src/model/models/tfidf_vectorizer.pkl
+      - name: Upload trained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: |
+            src/model/models/pdf_classifier_model.pkl
+            src/model/models/tfidf_vectorizer.pkl
 
       - name: Show pipeline summary
         run: |
@@ -129,4 +123,5 @@ jobs:
           ls -l data/processed-text/
           echo "2. Label Generation Results:"
           ls -l data/labels.json
-          echo "(Model steps skipped in this run)"
+          echo "3. Model Training Results:"
+          ls -l src/model/models/

@@ -17,6 +17,7 @@ import joblib
 import json
 import sys
 from collections import Counter
+import os
 
 
 # Load processed text files and their useful vs not useful labels.
@@ -56,29 +57,45 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
     if any(c < 2 for c in class_counts.values()):
         print(f"[ERROR] Each class needs at least 2 samples for stratified split. Counts: {class_counts}")
         return None
-    # Split the dataset into training and testing sets (stratified by label ratio)
+
+    # Decide split strategy accommodating very small CI samples.
+    X_train = X_test = y_train = y_test = None
+    perform_eval = True
+    min_class = min(class_counts.values())
+    n = len(labels)
+    test_size = 0.2
+    tiny_context = n < 10 or min_class < 3 or os.environ.get("CI_TRAIN", "").lower() in {"1", "true", "yes"}
+    if tiny_context:
+        # For tiny datasets, attempt a 50/50 split; if that fails, fall back to train-only.
+        test_size = 0.5
     try:
-        X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=0.2, random_state=42, stratify=labels)
+        X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=test_size, random_state=42, stratify=labels)
     except ValueError as e:
-        print(f"[ERROR] train_test_split failed: {e}")
-        return None
+        print(f"[WARN] Stratified split failed on tiny dataset: {e} — training on all data without evaluation.")
+        perform_eval = False
+        X_train = texts
+        y_train = labels
 
     # Convert text data into TF-IDF features
     vectorizer = TfidfVectorizer(max_features=10000, stop_words="english", ngram_range=(1, 3))
     X_train_vec = vectorizer.fit_transform(X_train)
-    X_test_vec = vectorizer.transform(X_test)
+    X_test_vec = vectorizer.transform(X_test) if perform_eval else None
 
     # Initialize a logistic regression classifier
     model = LogisticRegression(max_iter=100000, solver="liblinear")
     model.fit(X_train_vec, y_train)  # Train the model
 
     # Evaluate model performance
-    y_pred = model.predict(X_test_vec)
-    acc = accuracy_score(y_test, y_pred)
-    print("\n=== Model Evaluation ===")
-    print(f"Accuracy: {acc:.2f}")
-    print(classification_report(y_test, y_pred, digits=2))
-    print("========================\n")
+    if perform_eval and X_test_vec is not None:
+        y_pred = model.predict(X_test_vec)
+        acc = accuracy_score(y_test, y_pred)
+        print("\n=== Model Evaluation ===")
+        print(f"Accuracy: {acc:.2f}")
+        print(classification_report(y_test, y_pred, digits=2))
+        print("========================\n")
+    else:
+        acc = None
+        print("[INFO] Trained on full tiny dataset (no evaluation split).")
 
     # Save model and vectorizer for future use
     Path(output_dir).mkdir(parents=True, exist_ok=True)
