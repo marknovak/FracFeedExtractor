@@ -1,37 +1,36 @@
 """
-PDF FracFeedExtractor Classifier
+PDF FracFeedExtractor Classifier Model Training
 -------------------------
 
-This module uses scikit-learn to train and evaluate a text classification model
-that predicts whether a PDF is useful for predator diet data analysis.
-
-The model uses TF-IDF vectorization + Logistic Regression.
+This module trains a PDF classifier using TF-IDF vectorization + XGBoost
+to determine whether a PDF is useful for predator diet data analysis.
 """
 
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, accuracy_score
+
+import xgboost as xgb
 import joblib
 import json
 import sys
 from collections import Counter
-import os
 
 
-# Load processed text files and their useful vs not useful labels.
+# Load training texts and their labels
 def load_labeled_data(data_dir="data/processed-text", labels_file="data/labels.json"):
-    # Load label mappings from JSON file
     data_dir = Path(data_dir)
+
+    # Load label dictionary
     with open(labels_file, "r", encoding="utf-8") as f:
         labels_map = json.load(f)
 
-    # Iterate through all .txt files in the processed-text directory
+    # Iterate through processed text files
     texts, labels, filenames = [], [], []
     for txt_file in data_dir.glob("*.txt"):
         fname = txt_file.name
-        # Only include files that have a corresponding label
         if fname in labels_map:
             with open(txt_file, "r", encoding="utf-8") as f:
                 texts.append(f.read())
@@ -39,68 +38,81 @@ def load_labeled_data(data_dir="data/processed-text", labels_file="data/labels.j
                 filenames.append(fname)
         else:
             print(f"[WARN] No label found for {fname}, skipping.")
+
     return texts, labels, filenames
 
 
-# Trains and save a scikit-learn classification model.
+# Train an XGBoost text classifier with TF-IDF features.
 def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
-    # Basic validations
+
+    # Ensure dataset is not empty
     if not texts or not labels:
-        print("[ERROR] No training samples found. Ensure PDFs were extracted to text before training.")
+        print("[ERROR] No training samples found.")
         return None
 
+    # Need at least 2 classes to learn a classifier
     class_counts = Counter(labels)
     if len(class_counts) < 2:
-        print(f"[ERROR] Need at least 2 classes to train classifier. Found: {class_counts}")
+        print("[ERROR] Need at least two classes.")
         return None
 
     if any(c < 2 for c in class_counts.values()):
-        print(f"[ERROR] Each class needs at least 2 samples for stratified split. Counts: {class_counts}")
+        print("[ERROR] Each class needs at least 2 samples.")
         return None
 
-    # Decide split strategy accommodating very small CI samples.
-    X_train = X_test = y_train = y_test = None
-    perform_eval = True
-    min_class = min(class_counts.values())
-    n = len(labels)
-    test_size = 0.2
-    tiny_context = n < 10 or min_class < 3 or os.environ.get("CI_TRAIN", "").lower() in {"1", "true", "yes"}
-    if tiny_context:
-        # For tiny datasets, attempt a 50/50 split; if that fails, fall back to train-only.
-        test_size = 0.5
     try:
-        X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=test_size, random_state=42, stratify=labels)
+        # Stratified splitter ensures class balance in train/test sets
+        X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=0.2, random_state=42, stratify=labels)
     except ValueError as e:
-        print(f"[WARN] Stratified split failed on tiny dataset: {e} — training on all data without evaluation.")
-        perform_eval = False
-        X_train = texts
-        y_train = labels
+        print(f"[ERROR] train_test_split failed: {e}")
+        return None
 
-    # Convert text data into TF-IDF features
-    vectorizer = TfidfVectorizer(max_features=10000, stop_words="english", ngram_range=(1, 3))
+    # Convert target labels into numeric form
+    enc = LabelEncoder()
+    y_train = enc.fit_transform(y_train)
+    y_test = enc.transform(y_test)
+
+    # Build TF-IDF vectorizer for extracting text features
+    vectorizer = TfidfVectorizer(
+        max_features=10000,
+        stop_words="english",
+        ngram_range=(1, 3),
+    )
+
+    # Fit TF-IDF transformer on training data and apply to test data
     X_train_vec = vectorizer.fit_transform(X_train)
-    X_test_vec = vectorizer.transform(X_test) if perform_eval else None
+    X_test_vec = vectorizer.transform(X_test)
 
-    # Initialize a logistic regression classifier
-    model = LogisticRegression(max_iter=100000, solver="liblinear")
-    model.fit(X_train_vec, y_train)  # Train the model
+    # Convert to DMatrix for XGBoost
+    dtrain = xgb.DMatrix(X_train_vec, label=y_train)
+    dtest = xgb.DMatrix(X_test_vec, label=y_test)
 
-    # Evaluate model performance
-    if perform_eval and X_test_vec is not None:
-        y_pred = model.predict(X_test_vec)
-        acc = accuracy_score(y_test, y_pred)
-        print("\n=== Model Evaluation ===")
-        print(f"Accuracy: {acc:.2f}")
-        print(classification_report(y_test, y_pred, digits=2))
-        print("========================\n")
-    else:
-        acc = None
-        print("[INFO] Trained on full tiny dataset (no evaluation split).")
+    # XGBoost parameters
+    params = {"objective": "binary:logistic", "eval_metric": "logloss", "eta": 0.05, "max_depth": 6}  # binary classification  # log loss metric  # learning rate
 
-    # Save model and vectorizer for future use
+    # Train the model
+    model = xgb.train(
+        params,
+        dtrain,
+        num_boost_round=1000,
+    )
+
+    # Predict on test set and convert probabilities to labels
+    y_pred_prob = model.predict(dtest)
+    y_pred = [1 if p >= 0.5 else 0 for p in y_pred_prob]
+
+    # Evaluate accuracy
+    acc = accuracy_score(y_test, y_pred)
+    print("\n=== Model Evaluation ===")
+    print(f"Accuracy: {acc:.2f}")
+    print(classification_report(y_test, y_pred, digits=2))
+    print("========================\n")
+
+    # Save artifacts
     Path(output_dir).mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, Path(output_dir) / "pdf_classifier_model.pkl")
+    model.save_model(str(Path(output_dir) / "pdf_classifier.json"))
     joblib.dump(vectorizer, Path(output_dir) / "tfidf_vectorizer.pkl")
+    joblib.dump(enc, Path(output_dir) / "label_encoder.pkl")
 
     return {"accuracy": acc}
 
