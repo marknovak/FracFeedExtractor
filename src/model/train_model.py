@@ -72,6 +72,11 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
     y_train = enc.fit_transform(y_train)
     y_test = enc.transform(y_test)
 
+    # Calculate scale_pos_weight for imbalanced classes
+    num_pos = sum(y_train)
+    num_neg = len(y_train) - num_pos
+    scale_pos_weight = num_neg / max(num_pos, 1)
+
     # Build TF-IDF vectorizer for extracting text features
     vectorizer = TfidfVectorizer(
         max_features=10000,
@@ -88,13 +93,25 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
     dtest = xgb.DMatrix(X_test_vec, label=y_test)
 
     # XGBoost parameters
-    params = {"objective": "binary:logistic", "eval_metric": "logloss", "eta": 0.05, "max_depth": 6}  # binary classification  # log loss metric  # learning rate
+    params = {
+        "objective": "binary:logistic", # binary classification
+        "eval_metric": "logloss", # log loss metric
+        "eta": 0.05,         # learning rate
+        "max_depth": 6,
+        "subsample": 0.8,    # use 80% of data per boosting round
+        "alpha": 1.0,        # L1 regularization
+        "lambda": 1.0,       # L2 regularization
+        "scale_pos_weight": scale_pos_weight
+    }
 
     # Train the model
     model = xgb.train(
         params,
         dtrain,
-        num_boost_round=1000,
+        num_boost_round=500,
+        evals=[(dtrain, "train"), (dtest, "eval")],
+        early_stopping_rounds=20,          # stop if no improvement for 20 rounds
+        verbose_eval=True
     )
 
     # Predict on test set and convert probabilities to labels
