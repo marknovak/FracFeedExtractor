@@ -94,25 +94,18 @@ def train_pdf_classifier(texts, labels, output_dir="src/model/models"):
 
     # XGBoost parameters
     params = {
-        "objective": "binary:logistic", # binary classification
-        "eval_metric": "logloss", # log loss metric
-        "eta": 0.05,         # learning rate
+        "objective": "binary:logistic",  # binary classification
+        "eval_metric": "logloss",  # log loss metric
+        "eta": 0.05,  # learning rate
         "max_depth": 6,
-        "subsample": 0.8,    # use 80% of data per boosting round
-        "alpha": 1.0,        # L1 regularization
-        "lambda": 1.0,       # L2 regularization
-        "scale_pos_weight": scale_pos_weight
+        "subsample": 0.8,  # use 80% of data per boosting round
+        "alpha": 1.0,  # L1 regularization
+        "lambda": 1.0,  # L2 regularization
+        "scale_pos_weight": scale_pos_weight,
     }
 
     # Train the model
-    model = xgb.train(
-        params,
-        dtrain,
-        num_boost_round=500,
-        evals=[(dtrain, "train"), (dtest, "eval")],
-        early_stopping_rounds=20,          # stop if no improvement for 20 rounds
-        verbose_eval=True
-    )
+    model = xgb.train(params, dtrain, num_boost_round=500, evals=[(dtrain, "train"), (dtest, "eval")], early_stopping_rounds=20, verbose_eval=True)  # stop if no improvement for 20 rounds
 
     # Predict on test set and convert probabilities to labels
     y_pred_prob = model.predict(dtest)
